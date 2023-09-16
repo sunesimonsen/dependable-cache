@@ -1,0 +1,140 @@
+import { computed, observable } from "@dependable/state";
+
+/**
+ * @template T the type of the values stored in the cache.
+ *
+ * A cache implemented using <a href="https://github.com/sunesimonsen/dependable-state" target="_blank">@dependable/state</a>.
+ * This make retrieving values inside of a computed or inside of a <a href="https://github.com/sunesimonsen/dependable-view" target="_blank">@dependable/view</a>
+ * component automatically update.
+ */
+export class Cache {
+  /**
+   * Creates a new cache with the given name.
+   *
+   * @param {string} name the name of the cache. It needs to be unique.
+   */
+  constructor(name) {
+    /** @hidden */
+    this._accessors = {};
+    /** @hidden */
+    this._cache = observable({}, { id: `${name}Cache` });
+  }
+
+  /**
+   * Clear the cache.
+   */
+  clear() {
+    this._accessors = {};
+    this._cache({});
+  }
+
+  /** @hidden */
+  _getCacheEntry(id) {
+    const cacheEntries = this._cache();
+
+    let entry = cacheEntries[id];
+
+    if (!entry) {
+      entry = {
+        value: observable(null),
+        status: observable("uninitialized"),
+        error: observable(null),
+      };
+
+      this._cache({
+        ...cacheEntries,
+        [id]: entry,
+      });
+    }
+
+    return entry;
+  }
+
+  /**
+   * Get the value from the cache with the given id.
+   *
+   * @param {import('./shared').Id} id the id of the value to retrieve.
+   * @returns {[(T | null), import('./shared').Status, (Error | null)]}
+   */
+  byId(id) {
+    let accessor = this._accessors[id];
+
+    if (!accessor) {
+      accessor = computed(() => {
+        const entry = this._getCacheEntry(id);
+        return [entry.value(), entry.status(), entry.error()];
+      });
+      this._accessors[id] = accessor;
+    }
+
+    return accessor();
+  }
+
+  /**
+   * Load state into the cache using the given resolver and store it under the id.
+   *
+   * @param {import('./shared').Id} id the id that the resolved value should be stored under.
+   * @param {import('./shared').Resolver<T> | T} valueOrResolver either the resolved value or a resolver function.
+   * @returns {Promise<T | null>} promise for the resolved value.
+   */
+  async load(id, valueOrResolver) {
+    const entry = this._getCacheEntry(id);
+
+    entry.status("loading");
+    try {
+      const newValue =
+        typeof valueOrResolver === "function"
+          ? valueOrResolver()
+          : Promise.resolve(valueOrResolver);
+
+      entry.value(await newValue);
+      entry.error(null);
+      entry.status("loaded");
+
+      return newValue
+    } catch (err) {
+      entry.error(err);
+      entry.status("failed");
+
+      return null
+    }
+  }
+
+  /**
+   * Load state into the cache using the given resolver and store it under the ids.
+   *
+   * @param {(import('./shared').Id)[]} ids the ids that the resolved value should be stored under.
+   * @param {import('./shared').Resolver<T[]> | T[]} valuesOrResolver either the resolved values or a resolver function.
+   * @returns {Promise<T[] | null>} promise for the resolved value.
+   */
+  async loadMany(ids, valuesOrResolver) {
+    const newValuesPromise =
+      typeof valuesOrResolver === "function"
+        ? valuesOrResolver()
+        : valuesOrResolver;
+
+    const loaded = [];
+    for (let i = 0; i < ids.length; i++) {
+      loaded.push(
+        this.load(ids[i], async () => {
+          const newValues = await newValuesPromise;
+          return newValues[i];
+        }),
+      );
+    }
+
+    return Promise.all(loaded);
+  }
+
+  /**
+   * Evict the given id from the cache.
+   * @param {import('./shared').Id} id the id of the value to evict.
+   */
+  evict(id) {
+    const entry = this._getCacheEntry(id);
+
+    entry.value(null);
+    entry.status("uninitialized");
+    entry.error(null);
+  }
+}
