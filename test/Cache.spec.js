@@ -1,4 +1,4 @@
-import { Cache } from "../src/Cache.js";
+import { Cache, LOADED, LOADING, UNINITIALIZED, FAILED } from "../src/Cache.js";
 import { expect } from "./expect.js";
 import { FakePromise } from "fake-promise";
 
@@ -14,7 +14,7 @@ describe("Cache", () => {
       const [todo, status, error] = todos.byId(42);
 
       expect(todo, "to equal", null);
-      expect(status, "to equal", "uninitialized");
+      expect(status, "to equal", UNINITIALIZED);
       expect(error, "to equal", null);
     });
   });
@@ -25,7 +25,7 @@ describe("Cache", () => {
         const [todo, status, error] = todos.byId(42);
 
         expect(todo, "to equal", null);
-        expect(status, "to equal", "uninitialized");
+        expect(status, "to equal", UNINITIALIZED);
         expect(error, "to equal", null);
       });
     });
@@ -39,7 +39,7 @@ describe("Cache", () => {
         const [todo, status, error] = todos.byId(42);
 
         expect(todo, "to equal", { title: "Remember to test" });
-        expect(status, "to equal", "loaded");
+        expect(status, "to equal", LOADED);
         expect(error, "to equal", null);
       });
 
@@ -55,7 +55,7 @@ describe("Cache", () => {
           const [todo, status, error] = todos.byId(42);
 
           expect(todo, "to equal", { title: "Remember to test" });
-          expect(status, "to equal", "failed");
+          expect(status, "to equal", FAILED);
           expect(error, "to equal", err);
         });
       });
@@ -72,7 +72,7 @@ describe("Cache", () => {
         const [todo, status, error] = todos.byId(42);
 
         expect(todo, "to equal", null);
-        expect(status, "to equal", "failed");
+        expect(status, "to equal", FAILED);
         expect(error, "to equal", err);
       });
     });
@@ -86,7 +86,7 @@ describe("Cache", () => {
 
       const [todo, status, error] = todos.byId(42);
       expect(todo, "to equal", null);
-      expect(status, "to equal", "loading");
+      expect(status, "to equal", LOADING);
       expect(error, "to equal", null);
     });
 
@@ -96,7 +96,7 @@ describe("Cache", () => {
       const [todo, status, error] = todos.byId(42);
 
       expect(todo, "to equal", { title: "Remember to test" });
-      expect(status, "to equal", "loaded");
+      expect(status, "to equal", LOADED);
       expect(error, "to equal", null);
     });
 
@@ -110,7 +110,7 @@ describe("Cache", () => {
       const [todo, status, error] = todos.byId(42);
 
       expect(todo, "to equal", { title: "Remember to test" });
-      expect(status, "to equal", "loaded");
+      expect(status, "to equal", LOADED);
       expect(error, "to equal", null);
     });
   });
@@ -121,8 +121,8 @@ describe("Cache", () => {
 
       todos.loadMany([42, 43], () => fakePromise);
 
-      expect(todos.byId(42), "to equal", [null, "loading", null]);
-      expect(todos.byId(43), "to equal", [null, "loading", null]);
+      expect(todos.byId(42), "to equal", [null, LOADING, null]);
+      expect(todos.byId(43), "to equal", [null, LOADING, null]);
     });
 
     it("updates the entity with the given id with a value", async () => {
@@ -136,13 +136,13 @@ describe("Cache", () => {
 
       expect(todos.byId(42), "to equal", [
         { title: "Remember to test" },
-        "loaded",
+        LOADED,
         null,
       ]);
 
       expect(todos.byId(43), "to equal", [
         { title: "Even when there is many things to test" },
-        "loaded",
+        LOADED,
         null,
       ]);
     });
@@ -159,13 +159,13 @@ describe("Cache", () => {
 
       expect(todos.byId(42), "to equal", [
         { title: "Remember to test" },
-        "loaded",
+        LOADED,
         null,
       ]);
 
       expect(todos.byId(43), "to equal", [
         { title: "Even when there is many things to test" },
-        "loaded",
+        LOADED,
         null,
       ]);
     });
@@ -182,7 +182,7 @@ describe("Cache", () => {
       const [todo, status, error] = todos.byId(42);
 
       expect(todo, "to satisfy", null);
-      expect(status, "to satisfy", "uninitialized");
+      expect(status, "to satisfy", UNINITIALIZED);
       expect(error, "to satisfy", null);
     });
   });
@@ -198,7 +198,7 @@ describe("Cache", () => {
       const [todo, status, error] = todos.byId(42);
 
       expect(todo, "to satisfy", null);
-      expect(status, "to satisfy", "uninitialized");
+      expect(status, "to satisfy", UNINITIALIZED);
       expect(error, "to satisfy", null);
     });
   });

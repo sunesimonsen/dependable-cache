@@ -51,18 +51,20 @@ todos.load(42, async () => {
 We can get a value from the cache the following way.
 
 ```js
+import { UNINITIALIZED, LOADING, LOADED, FAILED } from "@dependable/cache";
+
 const [todo, status, error] = todos.byId(42);
 
-if (status === "failed") {
+if (status === FAILED) {
   // Loading the todo failed.
   // If this was a reload, you will still have the old value.
   console.log(error);
-} else if (status === "loading") {
+} else if (status === LOADING) {
   // The todo is loading.
   // If this was a reload, you will still have the old value.
-} else if (status === "uninitialized") {
+} else if (status === UNINITIALIZED) {
   // Loading the todo hasn't been started yet.
-} else if (status === "loaded") {
+} else if (status === LOADED) {
   // The todo finished loading.
 }
 ```
@@ -78,7 +80,7 @@ todos.evict(42);
 
 const [todo, status, error] = todos.byId(42);
 
-// will have null for the todo and a status of uninitialized.
+// will have null for the todo and a status of UNINITIALIZED.
 ```
 
 You can also clear the entire cache with the `clear` method.

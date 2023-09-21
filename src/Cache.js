@@ -1,5 +1,10 @@
 import { computed, observable } from "@dependable/state";
 
+export const UNINITIALIZED = "UNINITIALIZED";
+export const FAILED = "FAILED";
+export const LOADING = "LOADING";
+export const LOADED = "LOADED";
+
 /**
  * @template T the type of the values stored in the cache.
  *
@@ -37,7 +42,7 @@ export class Cache {
     if (!entry) {
       entry = {
         value: observable(null),
-        status: observable("uninitialized"),
+        status: observable(UNINITIALIZED),
         error: observable(null),
       };
 
@@ -80,7 +85,7 @@ export class Cache {
   async load(id, valueOrResolver) {
     const entry = this._getCacheEntry(id);
 
-    entry.status("loading");
+    entry.status(LOADING);
     try {
       const newValue =
         typeof valueOrResolver === "function"
@@ -89,12 +94,12 @@ export class Cache {
 
       entry.value(await newValue);
       entry.error(null);
-      entry.status("loaded");
+      entry.status(LOADED);
 
       return newValue;
     } catch (err) {
       entry.error(err);
-      entry.status("failed");
+      entry.status(FAILED);
 
       return null;
     }
@@ -134,7 +139,7 @@ export class Cache {
     const entry = this._getCacheEntry(id);
 
     entry.value(null);
-    entry.status("uninitialized");
+    entry.status(UNINITIALIZED);
     entry.error(null);
   }
 }
