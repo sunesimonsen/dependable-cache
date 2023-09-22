@@ -48,14 +48,14 @@
     "fake-promise": "^2.5.44",
     "mocha": "^10.2.0",
     "prettier": "^3.0.3",
-    "unexpected": "^12.0.5",
-    "unexpected-dependable": "^1.1.0",
-    "typedoc": "^0.22.17",
-    "surge": "^0.23.1",
     "rollup": "^2.27.1",
     "rollup-plugin-terser": "^7.0.2",
+    "surge": "^0.23.1",
     "terser": "^5.14.0",
-    "typescript": "^4.7.3"
+    "typedoc": "^0.22.17",
+    "typescript": "^4.7.3",
+    "unexpected": "^12.0.5",
+    "unexpected-dependable": "^1.1.0"
   },
   "publishConfig": {
     "access": "public"

@@ -1,3 +1,7 @@
+export const UNINITIALIZED: "UNINITIALIZED";
+export const FAILED: "FAILED";
+export const LOADING: "LOADING";
+export const LOADED: "LOADED";
 /**
  * @template T the type of the values stored in the cache.
  *

@@ -7,4 +7,4 @@ export type Resolver<T> = {
 
 export type Id = number | string;
 
-export type Status = "uninitialized" | "loading" | "loaded" | "failed";
+export type Status = "UNINITIALIZED" | "LOADING" | "LOADED" | "FAILED";

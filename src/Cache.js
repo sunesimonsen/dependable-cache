@@ -106,6 +106,23 @@ export class Cache {
   }
 
   /**
+   * Initialize the value using the given resolver and store it under the id.
+   *
+   * If the value is already initialized, it is not initialized again.
+   *
+   * @param {import('./shared').Id} id the id that the resolved value should be stored under.
+   * @param {import('./shared').Resolver<T> | T} valueOrResolver either the resolved value or a resolver function.
+   * @returns {Promise<T | null>} promise for the resolved value.
+   */
+  initialize(id, valueOrResolver) {
+    const entry = this._getCacheEntry(id);
+
+    if (entry.status() === UNINITIALIZED) {
+      return this.load(id, valueOrResolver);
+    }
+  }
+
+  /**
    * Load state into the cache using the given resolver and store it under the ids.
    *
    * @param {(import('./shared').Id)[]} ids the ids that the resolved value should be stored under.
