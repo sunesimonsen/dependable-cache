@@ -113,6 +113,24 @@ describe("Cache", () => {
       expect(status, "to equal", LOADED);
       expect(error, "to equal", null);
     });
+
+    it("allows re-loading a value", async () => {
+      const todos = new Cache("todo");
+
+      await todos.load(42, () => ({
+        title: "Remember to test",
+      }));
+
+      await todos.load(42, () => ({
+        title: "This is updated",
+      }));
+
+      const [todo, status, error] = todos.byId(42);
+
+      expect(todo, "to equal", { title: "This is updated" });
+      expect(status, "to equal", LOADED);
+      expect(error, "to equal", null);
+    });
   });
 
   describe("loadMany", () => {
@@ -168,6 +186,61 @@ describe("Cache", () => {
         LOADED,
         null,
       ]);
+    });
+  });
+
+  describe("initialize", () => {
+    it("sets the status to loading while resolving", () => {
+      const fakePromise = new FakePromise();
+
+      todos.initialize(42, () => fakePromise);
+
+      const [todo, status, error] = todos.byId(42);
+      expect(todo, "to equal", null);
+      expect(status, "to equal", LOADING);
+      expect(error, "to equal", null);
+    });
+
+    it("updates the entity with the given id with a value", async () => {
+      await todos.initialize(42, { title: "Remember to test" });
+
+      const [todo, status, error] = todos.byId(42);
+
+      expect(todo, "to equal", { title: "Remember to test" });
+      expect(status, "to equal", LOADED);
+      expect(error, "to equal", null);
+    });
+
+    it("updates the entity with the given id with a value returned by the resolver", async () => {
+      const todos = new Cache("todo");
+
+      await todos.initialize(42, () => ({
+        title: "Remember to test",
+      }));
+
+      const [todo, status, error] = todos.byId(42);
+
+      expect(todo, "to equal", { title: "Remember to test" });
+      expect(status, "to equal", LOADED);
+      expect(error, "to equal", null);
+    });
+
+    it("ignores re-initializing", async () => {
+      const todos = new Cache("todo");
+
+      await todos.initialize(42, {
+        title: "Remember to test",
+      });
+
+      await todos.initialize(42, {
+        title: "This is an update",
+      });
+
+      const [todo, status, error] = todos.byId(42);
+
+      expect(todo, "to equal", { title: "Remember to test" });
+      expect(status, "to equal", LOADED);
+      expect(error, "to equal", null);
     });
   });
 

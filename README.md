@@ -19,6 +19,8 @@ yarn add @dependable/cache
 
 ## Usage
 
+### Create a cache
+
 Let's create a cache for storing todo's.
 
 ```js
@@ -27,6 +29,8 @@ import { observable } from "@dependable/state";
 
 const todos = new Cache("todos");
 ```
+
+### Loading state into the cache
 
 Now we can load a todo into the cache using a resolver.
 
@@ -47,6 +51,29 @@ todos.load(42, async () => {
   };
 });
 ```
+
+If you only would like to initialize a value, you can use the initialize method.
+It will only run the resolver if the value hasn't been initialized already.
+
+```js
+todos.initialize(42, async () => {
+  const response = await fetch("https://example.com/todos/42");
+
+  if (!response.ok) {
+    throw new Error(response.statusText);
+  }
+
+  const data = await response.json();
+
+  return {
+    id: data.id,
+    title: observable(data.title),
+    completed: observable(data.completed),
+  };
+});
+```
+
+### Retrieving a value from the cache
 
 We can get a value from the cache the following way.
 
@@ -72,6 +99,10 @@ if (status === FAILED) {
 If the above call is done inside of a [@dependable/state](https://github.com/sunesimonsen/dependable-state) computed or a
 [@dependable/view](https://github.com/sunesimonsen/dependable-view) component,
 it will update everytime the status changes.
+
+If you would like to
+
+### Evicting values
 
 You can evict the a value the following way that will turn it back to be uninitialized.
 
