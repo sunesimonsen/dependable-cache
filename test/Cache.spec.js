@@ -1,6 +1,12 @@
+import { computed, flush } from "@dependable/state";
 import { Cache, LOADED, LOADING, UNINITIALIZED, FAILED } from "../src/Cache.js";
 import { expect } from "./expect.js";
 import { FakePromise } from "fake-promise";
+
+const delay = (timeout = 0) =>
+  new Promise((resolve) => {
+    setTimeout(resolve, timeout);
+  });
 
 describe("Cache", () => {
   let todos;
@@ -75,6 +81,39 @@ describe("Cache", () => {
         expect(status, "to equal", FAILED);
         expect(error, "to equal", err);
       });
+    });
+
+    it("triggers updates to computeds", async () => {
+      const fakePromise = new FakePromise();
+
+      const wired = computed(() => todos.byId(42));
+
+      const values = [];
+      wired.subscribe(() => {
+        values.push(wired());
+      });
+
+      todos.load(42, () => fakePromise);
+
+      flush();
+
+      fakePromise.resolve({
+        title: "Remember to test",
+      });
+
+      await delay();
+      flush();
+
+      expect(values, "to equal", [
+        [null, "LOADING", null],
+        [{ title: "Remember to test" }, "LOADED", null],
+      ]);
+
+      expect(wired(), "to equal", [
+        { title: "Remember to test" },
+        "LOADED",
+        null,
+      ]);
     });
   });
 

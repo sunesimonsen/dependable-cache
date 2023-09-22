@@ -42,6 +42,16 @@ export class Cache<T> {
      */
     load(id: import('./shared').Id, valueOrResolver: import('./shared').Resolver<T> | T): Promise<T | null>;
     /**
+     * Initialize the value using the given resolver and store it under the id.
+     *
+     * If the value is already initialized, it is not initialized again.
+     *
+     * @param {import('./shared').Id} id the id that the resolved value should be stored under.
+     * @param {import('./shared').Resolver<T> | T} valueOrResolver either the resolved value or a resolver function.
+     * @returns {Promise<T | null>} promise for the resolved value.
+     */
+    initialize(id: import('./shared').Id, valueOrResolver: import('./shared').Resolver<T> | T): Promise<T | null>;
+    /**
      * Load state into the cache using the given resolver and store it under the ids.
      *
      * @param {(import('./shared').Id)[]} ids the ids that the resolved value should be stored under.
