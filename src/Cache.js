@@ -158,5 +158,8 @@ export class Cache {
     entry.value(null);
     entry.status(UNINITIALIZED);
     entry.error(null);
+
+    delete this._accessors[id];
+    this._cache({ ...this._cache(), [id]: undefined });
   }
 }
