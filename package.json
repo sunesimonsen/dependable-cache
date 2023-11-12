@@ -1,7 +1,7 @@
 {
   "type": "module",
   "name": "@dependable/cache",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "A reactive cache for @dependable/state",
   "author": "Sune Simonsen",
   "license": "MIT",
@@ -9,8 +9,17 @@
   "exports": {
     ".": "./src/Cache.js"
   },
-  "files": ["dist", "src", "types"],
-  "keywords": ["dependable", "observable", "state", "cache"],
+  "files": [
+    "dist",
+    "src",
+    "types"
+  ],
+  "keywords": [
+    "dependable",
+    "observable",
+    "state",
+    "cache"
+  ],
   "scripts": {
     "api-docs": "npm run types && typedoc --out api-docs --hideLegend --hideGenerator src/shared.d.ts src/Cache.js",
     "build": "rm -rf dist types && npm run types && rollup -c rollup.config.js",
