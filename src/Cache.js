@@ -16,13 +16,17 @@ export class Cache {
   /**
    * Creates a new cache with the given name.
    *
-   * @param {string} name the name of the cache. It needs to be unique.
+   * @param {string?} name the name of the cache. It needs to be unique when specified.
    */
   constructor(name) {
     /** @hidden */
     this._accessors = {};
     /** @hidden */
-    this._cache = observable({}, { id: `${name}Cache` });
+    if (name) {
+      this._cache = observable({}, { id: `${name}Cache` });
+    } else {
+      this._cache = observable({});
+    }
   }
 
   /**

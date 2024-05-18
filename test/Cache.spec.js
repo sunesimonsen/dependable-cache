@@ -16,12 +16,20 @@ describe("Cache", () => {
   });
 
   describe("constructor", () => {
-    it("creates a new entity cache with the given name", () => {
-      const [todo, status, error] = todos.byId(42);
+    describe("when given a name", () => {
+      it("creates a new entity cache with the given name", () => {
+        const todos = new Cache("todo");
+        expect(todos._cache.id, "to be", "todoCache");
+        expect(todos._cache.kind, "to be", "observable");
+      });
+    });
 
-      expect(todo, "to equal", null);
-      expect(status, "to equal", UNINITIALIZED);
-      expect(error, "to equal", null);
+    describe("when not given a name", () => {
+      it("creates a new anonymous entity cache", () => {
+        const todos = new Cache();
+        expect(todos._cache.id, "to be undefined");
+        expect(todos._cache.kind, "to be", "observable");
+      });
     });
   });
 

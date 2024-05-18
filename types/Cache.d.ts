@@ -13,12 +13,11 @@ export class Cache<T> {
     /**
      * Creates a new cache with the given name.
      *
-     * @param {string} name the name of the cache. It needs to be unique.
+     * @param {string?} name the name of the cache. It needs to be unique when specified.
      */
-    constructor(name: string);
+    constructor(name: string | null);
     /** @hidden */
     _accessors: {};
-    /** @hidden */
     _cache: import("@dependable/state/types/shared").Observable<{}>;
     /**
      * Clear the cache.

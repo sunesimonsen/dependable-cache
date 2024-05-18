@@ -115,3 +115,18 @@ const [todo, status, error] = todos.byId(42);
 ```
 
 You can also clear the entire cache with the `clear` method.
+
+### Storing non-serializable objects
+
+In case you need to store non-serializable objects in a cache, you can create a cache without giving it a name. This way the observable backing the cache will be anonymous and it's values will not be handled by the development tools.
+
+This is useful for lazy loading components.
+
+```js
+const components = new Cache()
+
+components.load('editor', import('./editor.js'));
+
+
+const [module, status, error] = components.byId('editor');
+```
