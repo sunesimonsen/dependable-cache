@@ -1,7 +1,7 @@
 {
   "type": "module",
   "name": "@dependable/cache",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "A reactive cache for @dependable/state",
   "author": "Sune Simonsen",
   "license": "MIT",
