@@ -80,6 +80,17 @@ export class Cache {
   }
 
   /**
+   * Get the status of a cache entry with the given id.
+   *
+   * @param {import('./shared').Id} id the id of the entry to retrieve.
+   * @returns {import('./shared').Status}
+   */
+  statusById(id) {
+    const entry = this._getCacheEntry(id);
+    return entry.status();
+  }
+
+  /**
    * Load state into the cache using the given resolver and store it under the id.
    *
    * @param {import('./shared').Id} id the id that the resolved value should be stored under.

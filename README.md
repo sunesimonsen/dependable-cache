@@ -98,9 +98,29 @@ if (status === FAILED) {
 
 If the above call is done inside of a [@dependable/state](https://github.com/sunesimonsen/dependable-state) computed or a
 [@dependable/view](https://github.com/sunesimonsen/dependable-view) component,
-it will update everytime the status changes.
+it will update every time the status changes.
 
-If you would like to
+### Getting only the status
+
+If you just need the status of a cache entry, you can use the `statusById` method.
+
+```js
+import { UNINITIALIZED, LOADING, LOADED, FAILED } from "@dependable/cache";
+
+const status = todos.statusById(42);
+
+if (status === FAILED) {
+  // Loading the todo failed.
+  // If this was a reload, you will still have the old value.
+  console.log(error);
+} else if (status === LOADING) {
+  // The todo is loading.
+} else if (status === UNINITIALIZED) {
+  // Loading the todo hasn't been started yet.
+} else if (status === LOADED) {
+  // The todo finished loading.
+}
+```
 
 ### Evicting values
 
@@ -123,10 +143,9 @@ In case you need to store non-serializable objects in a cache, you can create a 
 This is useful for lazy loading components.
 
 ```js
-const components = new Cache()
+const components = new Cache();
 
-components.load('editor', import('./editor.js'));
+components.load("editor", import("./editor.js"));
 
-
-const [module, status, error] = components.byId('editor');
+const [module, status, error] = components.byId("editor");
 ```

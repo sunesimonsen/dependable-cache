@@ -125,6 +125,83 @@ describe("Cache", () => {
     });
   });
 
+  describe("statusById", () => {
+    describe("when the entity isn't loaded", () => {
+      it("returns UNINITIALIZED", () => {
+        const status = todos.statusById(42);
+
+        expect(status, "to equal", UNINITIALIZED);
+      });
+    });
+
+    describe("when the entity is loaded", () => {
+      beforeEach(async () => {
+        await todos.load(42, { title: "Remember to test" });
+      });
+
+      it("returns LOADED", () => {
+        const status = todos.statusById(42);
+
+        expect(status, "to equal", LOADED);
+      });
+
+      describe("and a reload is failing", () => {
+        const err = new Error("custom error");
+
+        beforeEach(async () => {
+          await todos.load(42, { title: "Remember to test" });
+          await todos.load(42, () => FakePromise.reject(err));
+        });
+
+        it("returns FAILED", () => {
+          const status = todos.statusById(42);
+
+          expect(status, "to equal", FAILED);
+        });
+      });
+    });
+
+    describe("when the entity is in a failed state", () => {
+      const err = new Error("custom error");
+
+      beforeEach(async () => {
+        await todos.load(42, () => FakePromise.reject(err));
+      });
+
+      it("returns a failed state", () => {
+        const status = todos.statusById(42);
+
+        expect(status, "to equal", FAILED);
+      });
+    });
+
+    it("triggers updates to computeds", async () => {
+      const fakePromise = new FakePromise();
+
+      const wired = computed(() => todos.statusById(42));
+
+      const values = [];
+      wired.subscribe(() => {
+        values.push(wired());
+      });
+
+      todos.load(42, () => fakePromise);
+
+      flush();
+
+      fakePromise.resolve({
+        title: "Remember to test",
+      });
+
+      await delay();
+      flush();
+
+      expect(values, "to equal", ["LOADING", "LOADED"]);
+
+      expect(wired(), "to equal", "LOADED");
+    });
+  });
+
   describe("load", () => {
     it("sets the status to loading while resolving", () => {
       const fakePromise = new FakePromise();
