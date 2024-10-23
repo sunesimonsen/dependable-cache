@@ -33,6 +33,13 @@ export class Cache<T> {
      */
     byId(id: import('./shared').Id): [(T | null), import('./shared').Status, (Error | null)];
     /**
+     * Get the status of a cache entry with the given id.
+     *
+     * @param {import('./shared').Id} id the id of the entry to retrieve.
+     * @returns {import('./shared').Status}
+     */
+    statusById(id: import('./shared').Id): import('./shared').Status;
+    /**
      * Load state into the cache using the given resolver and store it under the id.
      *
      * @param {import('./shared').Id} id the id that the resolved value should be stored under.
@@ -44,6 +51,8 @@ export class Cache<T> {
      * Initialize the value using the given resolver and store it under the id.
      *
      * If the value is already initialized, it is not initialized again.
+     *
+     * Notice that if initialiazing fails, calling initialize again will reload the value.
      *
      * @param {import('./shared').Id} id the id that the resolved value should be stored under.
      * @param {import('./shared').Resolver<T> | T} valueOrResolver either the resolved value or a resolver function.
