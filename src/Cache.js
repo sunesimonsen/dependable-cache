@@ -86,8 +86,35 @@ export class Cache {
    * @returns {import('./shared').Status}
    */
   statusById(id) {
-    const entry = this._getCacheEntry(id);
-    return entry.status();
+    return this._getCacheEntry(id).status();
+  }
+
+  /**
+   * Returns a promise that will resolve when the status of a cache entry with
+   * the given id is loaded.
+   *
+   * This is useful for waiting for a value like an authentication token
+   * becoming available.
+   *
+   * @param {import('./shared').Id} id the id of the entry to retrieve.
+   * @returns {T}
+   */
+  loaded(id) {
+    return new Promise((resolve, reject) => {
+      const entry = this._getCacheEntry(id);
+      const onChange = () => {
+        const status = entry.status();
+        if (status === LOADED) {
+          entry.status.unsubscribe(onChange);
+          resolve(entry.value());
+        } else if (status === FAILED) {
+          entry.status.unsubscribe(onChange);
+          reject(entry.error());
+        }
+      };
+
+      entry.status.subscribe(onChange);
+    });
   }
 
   /**

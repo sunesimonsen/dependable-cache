@@ -202,6 +202,60 @@ describe("Cache", () => {
     });
   });
 
+  describe("loaded", () => {
+    it("returns a promise that resolves when the entry is loaded", async () => {
+      const fakePromise = new FakePromise();
+
+      todos.load(42, () => fakePromise);
+
+      const loadedPromise = todos.loaded(42);
+
+      fakePromise.resolve({ title: "Remember to test" });
+
+      const todo = await loadedPromise;
+
+      expect(todo, "to equal", { title: "Remember to test" });
+    });
+
+    it("returns a promise that is rejected when the entry fails loading", async () => {
+      const fakePromise = new FakePromise();
+
+      todos.load(42, () => fakePromise);
+
+      const loadedPromise = todos.loaded(42);
+
+      fakePromise.reject(new Error("My error"));
+
+      await expect(loadedPromise, "to be rejected with", new Error("My error"));
+    });
+
+    describe("when the entry is already loaded", () => {
+      it("the returned promise resolves immediately", async () => {
+        todos.load(42, { title: "Remember to test" });
+
+        const todo = await todos.loaded(42);
+
+        expect(todo, "to equal", { title: "Remember to test" });
+      });
+    });
+
+    describe("when creating the promise before the entry exists", () => {
+      it("still waits for the status to either become LOADED or FAILED", async () => {
+        const loadedPromise = todos.loaded(42);
+
+        const fakePromise = new FakePromise();
+
+        todos.load(42, () => fakePromise);
+
+        fakePromise.resolve({ title: "Remember to test" });
+
+        const todo = await loadedPromise;
+
+        expect(todo, "to equal", { title: "Remember to test" });
+      });
+    });
+  });
+
   describe("load", () => {
     it("sets the status to loading while resolving", () => {
       const fakePromise = new FakePromise();

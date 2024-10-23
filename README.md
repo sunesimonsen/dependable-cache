@@ -122,6 +122,16 @@ if (status === FAILED) {
 }
 ```
 
+### Waiting for a value to be initialized
+
+In some rare cases it is useful to wait for a value being resolved. You can use the `loaded` method to get a promise that will either resolve when the values status becomes `LOADED` or reject when the status becomes `FAILED`.
+
+```js
+const todo = await todos.loaded(42);
+
+console.log(todo);
+```
+
 ### Evicting values
 
 You can evict the a value the following way that will turn it back to be uninitialized.
