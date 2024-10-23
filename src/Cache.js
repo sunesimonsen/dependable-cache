@@ -125,6 +125,8 @@ export class Cache {
    *
    * If the value is already initialized, it is not initialized again.
    *
+   * Notice that if initialiazing fails, calling initialize again will reload the value.
+   *
    * @param {import('./shared').Id} id the id that the resolved value should be stored under.
    * @param {import('./shared').Resolver<T> | T} valueOrResolver either the resolved value or a resolver function.
    * @returns {Promise<T | null>} promise for the resolved value.
@@ -132,7 +134,8 @@ export class Cache {
   initialize(id, valueOrResolver) {
     const entry = this._getCacheEntry(id);
 
-    if (entry.status() === UNINITIALIZED) {
+    const status = entry.status();
+    if (status === UNINITIALIZED || status === FAILED) {
       return this.load(id, valueOrResolver);
     }
   }

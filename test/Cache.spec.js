@@ -349,6 +349,30 @@ describe("Cache", () => {
       expect(error, "to equal", null);
     });
 
+    it("reloads failed values", async () => {
+      const fakePromise = new FakePromise();
+
+      const todos = new Cache("todo");
+
+      const initializePromise = todos.initialize(42, () => fakePromise);
+      fakePromise.reject(new Error("Failed"));
+      await initializePromise;
+
+      let result = todos.byId(42);
+
+      expect(result[0], "to equal", null);
+      expect(result[1], "to equal", FAILED);
+      expect(result[2], "to satisfy", { message: "Failed" });
+
+      await todos.initialize(42, { title: "Remember to test" });
+
+      result = todos.byId(42);
+
+      expect(result[0], "to equal", { title: "Remember to test" });
+      expect(result[1], "to equal", LOADED);
+      expect(result[2], "to equal", null);
+    });
+
     it("ignores re-initializing", async () => {
       const todos = new Cache("todo");
 
