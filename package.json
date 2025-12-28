@@ -33,7 +33,7 @@
     "prepublishOnly": "npm run build",
     "publish-docs": "npm run api-docs && surge api-docs dependable-cache-api.surge.sh",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
-    "typecheck": "tsc --noEmit"
+    "check:ts": "tsc --noEmit"
   },
   "bugs": "https://github.com/sunesimonsen/dependable-cache/issues",
   "repository": {
@@ -41,7 +41,7 @@
     "url": "https://github.com/sunesimonsen/dependable-cache"
   },
   "dependencies": {
-    "@dependable/state": ">= 0.20"
+    "@dependable/state": ">= 0.22"
   },
   "devDependencies": {
     "@rollup/plugin-typescript": "^11.1.6",

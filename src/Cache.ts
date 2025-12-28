@@ -1,28 +1,10 @@
-import { computed, observable } from "@dependable/state";
+import { computed, observable, Observable, Computed } from "@dependable/state";
 import type { Id, Status, Resolver } from "./shared.js";
 import { UNINITIALIZED, FAILED, LOADING, LOADED } from "./shared.js";
 
 // Re-export constants and types for convenience
 export { UNINITIALIZED, FAILED, LOADING, LOADED };
 export type { Id, Status, Resolver };
-
-/**
- * Observable type from @dependable/state.
- */
-type Observable<T> = {
-  (): T;
-  (value: T): void;
-  id?: string;
-  kind?: string;
-};
-
-/**
- * Computed type from @dependable/state.
- */
-type Computed<T> = {
-  (): T;
-  subscribe: (callback: () => void) => void;
-};
 
 /**
  * Internal cache entry structure.
