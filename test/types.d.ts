@@ -1,13 +1,3 @@
-declare module "unexpected" {
-  const unexpected: any;
-  export default unexpected;
-}
-
-declare module "unexpected-dependable" {
-  const unexpectedDependable: any;
-  export default unexpectedDependable;
-}
-
 declare module "fake-promise" {
   export class FakePromise<T = unknown> implements Promise<T> {
     constructor();

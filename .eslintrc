@@ -1,12 +1,12 @@
 {
   "extends": ["prettier", "eslint:recommended"],
-  "plugins": ["import", "mocha"],
+  "plugins": ["import"],
   "globals": {
     "__DEV__": true
   },
   "env": {
     "es6": true,
-    "mocha": true,
+    "jest": true,
     "browser": true,
     "node": true
   },
@@ -36,15 +36,13 @@
         "devDependencies": [
           "test/*.ts",
           "test/*.js",
-          "rollup.config.js"
+          "rollup.config.js",
+          "jest.config.cjs"
         ],
         "optionalDependencies": false,
         "peerDependencies": true
       }
-    ],
-    "mocha/no-exclusive-tests": "error",
-    "mocha/no-nested-tests": "error",
-    "mocha/no-identical-title": "error"
+    ]
   },
   "parserOptions": {
     "ecmaVersion": 2020,
