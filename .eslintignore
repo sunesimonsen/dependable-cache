@@ -1,3 +1,5 @@
 dist
+types
 coverage
 api-docs
+*.d.ts

@@ -7,15 +7,36 @@
   "env": {
     "es6": true,
     "mocha": true,
-    "browser": true
+    "browser": true,
+    "node": true
   },
+  "overrides": [
+    {
+      "files": ["*.ts"],
+      "parser": "@typescript-eslint/parser",
+      "parserOptions": {
+        "ecmaVersion": 2020,
+        "sourceType": "module",
+        "project": "./tsconfig.eslint.json"
+      },
+      "extends": [
+        "plugin:@typescript-eslint/recommended",
+        "prettier"
+      ],
+      "rules": {
+        "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/explicit-module-boundary-types": "off"
+      }
+    }
+  ],
   "rules": {
     "import/no-extraneous-dependencies": [
       "error",
       {
         "devDependencies": [
+          "test/*.ts",
           "test/*.js",
-          "rollup.config.js",
+          "rollup.config.js"
         ],
         "optionalDependencies": false,
         "peerDependencies": true

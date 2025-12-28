@@ -3,22 +3,26 @@ import { Cache, LOADED, LOADING, UNINITIALIZED, FAILED } from "../src/Cache.js";
 import { expect } from "./expect.js";
 import { FakePromise } from "fake-promise";
 
+interface Todo {
+  title: string;
+}
+
 const delay = (timeout = 0) =>
-  new Promise((resolve) => {
+  new Promise<void>((resolve) => {
     setTimeout(resolve, timeout);
   });
 
 describe("Cache", () => {
-  let todos;
+  let todos: Cache<Todo>;
 
   beforeEach(() => {
-    todos = new Cache("todo");
+    todos = new Cache<Todo>("todo");
   });
 
   describe("constructor", () => {
     describe("when given a name", () => {
       it("creates a new entity cache with the given name", () => {
-        const todos = new Cache("todo");
+        const todos = new Cache<Todo>("todo");
         expect(todos._cache.id, "to be", "todoCache");
         expect(todos._cache.kind, "to be", "observable");
       });
@@ -26,7 +30,7 @@ describe("Cache", () => {
 
     describe("when not given a name", () => {
       it("creates a new anonymous entity cache", () => {
-        const todos = new Cache();
+        const todos = new Cache<Todo>();
         expect(todos._cache.id, "to be undefined");
         expect(todos._cache.kind, "to be", "observable");
       });
@@ -92,16 +96,16 @@ describe("Cache", () => {
     });
 
     it("triggers updates to computeds", async () => {
-      const fakePromise = new FakePromise();
+      const fakePromise = new FakePromise<Todo>();
 
       const wired = computed(() => todos.byId(42));
 
-      const values = [];
+      const values: [Todo | null, string, Error | null][] = [];
       wired.subscribe(() => {
         values.push(wired());
       });
 
-      todos.load(42, () => fakePromise);
+      todos.load(42, () => fakePromise as Promise<Todo>);
 
       flush();
 
@@ -176,16 +180,16 @@ describe("Cache", () => {
     });
 
     it("triggers updates to computeds", async () => {
-      const fakePromise = new FakePromise();
+      const fakePromise = new FakePromise<Todo>();
 
       const wired = computed(() => todos.statusById(42));
 
-      const values = [];
+      const values: string[] = [];
       wired.subscribe(() => {
         values.push(wired());
       });
 
-      todos.load(42, () => fakePromise);
+      todos.load(42, () => fakePromise as Promise<Todo>);
 
       flush();
 
@@ -204,9 +208,9 @@ describe("Cache", () => {
 
   describe("load", () => {
     it("sets the status to loading while resolving", () => {
-      const fakePromise = new FakePromise();
+      const fakePromise = new FakePromise<Todo>();
 
-      todos.load(42, () => fakePromise);
+      todos.load(42, () => fakePromise as Promise<Todo>);
 
       const [todo, status, error] = todos.byId(42);
       expect(todo, "to equal", null);
@@ -225,7 +229,7 @@ describe("Cache", () => {
     });
 
     it("updates the entity with the given id with a value returned by the resolver", async () => {
-      const todos = new Cache("todo");
+      const todos = new Cache<Todo>("todo");
 
       await todos.load(42, () => ({
         title: "Remember to test",
@@ -239,7 +243,7 @@ describe("Cache", () => {
     });
 
     it("allows re-loading a value", async () => {
-      const todos = new Cache("todo");
+      const todos = new Cache<Todo>("todo");
 
       await todos.load(42, () => ({
         title: "Remember to test",
@@ -259,9 +263,9 @@ describe("Cache", () => {
 
   describe("loadMany", () => {
     it("sets the status to loading while resolving", () => {
-      const fakePromise = new FakePromise();
+      const fakePromise = new FakePromise<Todo[]>();
 
-      todos.loadMany([42, 43], () => fakePromise);
+      todos.loadMany([42, 43], () => fakePromise as Promise<Todo[]>);
 
       expect(todos.byId(42), "to equal", [null, LOADING, null]);
       expect(todos.byId(43), "to equal", [null, LOADING, null]);
@@ -290,7 +294,7 @@ describe("Cache", () => {
     });
 
     it("updates the entity with the given id with a value returned by the resolver", async () => {
-      const todos = new Cache("todo");
+      const todos = new Cache<Todo>("todo");
 
       await todos.loadMany([42, 43], () =>
         Promise.resolve([
@@ -315,9 +319,9 @@ describe("Cache", () => {
 
   describe("initialize", () => {
     it("sets the status to loading while resolving", () => {
-      const fakePromise = new FakePromise();
+      const fakePromise = new FakePromise<Todo>();
 
-      todos.initialize(42, () => fakePromise);
+      todos.initialize(42, () => fakePromise as Promise<Todo>);
 
       const [todo, status, error] = todos.byId(42);
       expect(todo, "to equal", null);
@@ -336,7 +340,7 @@ describe("Cache", () => {
     });
 
     it("updates the entity with the given id with a value returned by the resolver", async () => {
-      const todos = new Cache("todo");
+      const todos = new Cache<Todo>("todo");
 
       await todos.initialize(42, () => ({
         title: "Remember to test",
@@ -350,11 +354,14 @@ describe("Cache", () => {
     });
 
     it("reloads failed values", async () => {
-      const fakePromise = new FakePromise();
+      const fakePromise = new FakePromise<Todo>();
 
-      const todos = new Cache("todo");
+      const todos = new Cache<Todo>("todo");
 
-      const initializePromise = todos.initialize(42, () => fakePromise);
+      const initializePromise = todos.initialize(
+        42,
+        () => fakePromise as Promise<Todo>,
+      );
       fakePromise.reject(new Error("Failed"));
       await initializePromise;
 
@@ -374,7 +381,7 @@ describe("Cache", () => {
     });
 
     it("ignores re-initializing", async () => {
-      const todos = new Cache("todo");
+      const todos = new Cache<Todo>("todo");
 
       await todos.initialize(42, {
         title: "Remember to test",
