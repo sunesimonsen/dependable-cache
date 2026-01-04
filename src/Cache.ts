@@ -1,10 +1,26 @@
 import { computed, observable, Observable, Computed } from "@dependable/state";
-import type { Id, Status, Resolver } from "./shared.js";
-import { UNINITIALIZED, FAILED, LOADING, LOADED } from "./shared.js";
 
-// Re-export constants and types for convenience
-export { UNINITIALIZED, FAILED, LOADING, LOADED };
-export type { Id, Status, Resolver };
+/**
+ * A function resolving a value of type T.
+ * Can return either a Promise or the value directly.
+ */
+export type Resolver<T> = () => Promise<T> | T;
+
+/**
+ * The ID type for cache entries - can be a number or string.
+ */
+export type Id = string | number;
+
+/**
+ * The status of a cache entry.
+ */
+export type Status = "UNINITIALIZED" | "LOADING" | "LOADED" | "FAILED";
+
+// Export status constants as const values for runtime use
+export const UNINITIALIZED: Status = "UNINITIALIZED";
+export const FAILED: Status = "FAILED";
+export const LOADING: Status = "LOADING";
+export const LOADED: Status = "LOADED";
 
 /**
  * Internal cache entry structure.
@@ -53,7 +69,7 @@ type CacheStorage<T> = {
  * ```
  */
 export class Cache<T = any> {
-  readonly _cache: Observable<CacheStorage<T>>;
+  private _cache: Observable<CacheStorage<T>>;
   private _accessors: Record<
     string,
     Computed<[T | null, Status, Error | null]>

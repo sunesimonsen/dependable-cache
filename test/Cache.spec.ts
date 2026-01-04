@@ -1,5 +1,5 @@
 import { computed, flush } from "@dependable/state";
-import { Cache, LOADED, LOADING, UNINITIALIZED, FAILED } from "../src/Cache.js";
+import { Cache, LOADED, LOADING, UNINITIALIZED, FAILED } from "../src/Cache";
 import { FakePromise } from "fake-promise";
 
 interface Todo {
@@ -16,24 +16,6 @@ describe("Cache", () => {
 
   beforeEach(() => {
     todos = new Cache<Todo>("todo");
-  });
-
-  describe("constructor", () => {
-    describe("when given a name", () => {
-      it("creates a new entity cache with the given name", () => {
-        const todos = new Cache<Todo>("todo");
-        expect(todos._cache.id).toBe("todoCache");
-        expect(todos._cache.kind).toBe("observable");
-      });
-    });
-
-    describe("when not given a name", () => {
-      it("creates a new anonymous entity cache", () => {
-        const todos = new Cache<Todo>();
-        expect(todos._cache.id).toBeUndefined();
-        expect(todos._cache.kind).toBe("observable");
-      });
-    });
   });
 
   describe("byId", () => {

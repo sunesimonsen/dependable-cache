@@ -15,8 +15,7 @@
   },
   "files": [
     "dist",
-    "src",
-    "types"
+    "src"
   ],
   "keywords": [
     "dependable",
@@ -25,8 +24,8 @@
     "cache"
   ],
   "scripts": {
-    "api-docs": "typedoc --out api-docs --hideLegend --hideGenerator src/Cache.ts",
-    "build": "rm -rf dist types && tsc && rollup -c rollup.config.js",
+    "api-docs": "typedoc --out api-docs --hideGenerator src/Cache.ts",
+    "build": "rm -rf dist && tsc && rollup -c rollup.config.js",
     "coverage": "NODE_OPTIONS=--experimental-vm-modules jest --coverage",
     "format": "prettier --write '**/*.{ts,js,mjs,md,json}'",
     "lint": "eslint '**/*.{ts,js,mjs}' && prettier --check '**/*.{ts,js,mjs,md,json}'",

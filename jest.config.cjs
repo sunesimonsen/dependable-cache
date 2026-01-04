@@ -5,11 +5,9 @@ module.exports = {
   collectCoverageFrom: ["src/**/*.ts"],
   coverageDirectory: "coverage",
   coverageReporters: ["text", "lcov"],
-  moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
+  moduleFileExtensions: ["ts", "js", "json", "node"],
   extensionsToTreatAsEsm: [".ts"],
-  transformIgnorePatterns: [
-    "node_modules/(?!@dependable/state|fake-promise)",
-  ],
+  transformIgnorePatterns: ["node_modules/(?!@dependable/state)"],
   transform: {
     "^.+\\.ts$": [
       "ts-jest",
@@ -19,12 +17,9 @@ module.exports = {
           target: "ES2020",
           module: "ESNext",
           esModuleInterop: true,
-          skipLibCheck: true,
+          skipLibCheck: false,
         },
       },
     ],
-  },
-  moduleNameMapper: {
-    "^(\\.{1,2}/.*)\\.js$": "$1",
   },
 };
