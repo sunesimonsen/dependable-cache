@@ -1,36 +1,21 @@
 import { computed, flush } from "@dependable/state";
-import { Cache, LOADED, LOADING, UNINITIALIZED, FAILED } from "../src/Cache.js";
-import { expect } from "./expect.js";
+import { Cache, LOADED, LOADING, UNINITIALIZED, FAILED } from "../src/Cache";
 import { FakePromise } from "fake-promise";
 
+interface Todo {
+  title: string;
+}
+
 const delay = (timeout = 0) =>
-  new Promise((resolve) => {
+  new Promise<void>((resolve) => {
     setTimeout(resolve, timeout);
   });
 
 describe("Cache", () => {
-  let todos;
+  let todos: Cache<Todo>;
 
   beforeEach(() => {
-    todos = new Cache("todo");
-  });
-
-  describe("constructor", () => {
-    describe("when given a name", () => {
-      it("creates a new entity cache with the given name", () => {
-        const todos = new Cache("todo");
-        expect(todos._cache.id, "to be", "todoCache");
-        expect(todos._cache.kind, "to be", "observable");
-      });
-    });
-
-    describe("when not given a name", () => {
-      it("creates a new anonymous entity cache", () => {
-        const todos = new Cache();
-        expect(todos._cache.id, "to be undefined");
-        expect(todos._cache.kind, "to be", "observable");
-      });
-    });
+    todos = new Cache<Todo>("todo");
   });
 
   describe("byId", () => {
@@ -38,9 +23,9 @@ describe("Cache", () => {
       it("returns an uninitialised entry", () => {
         const [todo, status, error] = todos.byId(42);
 
-        expect(todo, "to equal", null);
-        expect(status, "to equal", UNINITIALIZED);
-        expect(error, "to equal", null);
+        expect(todo).toEqual(null);
+        expect(status).toEqual(UNINITIALIZED);
+        expect(error).toEqual(null);
       });
     });
 
@@ -52,9 +37,9 @@ describe("Cache", () => {
       it("returns an initialised entry", () => {
         const [todo, status, error] = todos.byId(42);
 
-        expect(todo, "to equal", { title: "Remember to test" });
-        expect(status, "to equal", LOADED);
-        expect(error, "to equal", null);
+        expect(todo).toEqual({ title: "Remember to test" });
+        expect(status).toEqual(LOADED);
+        expect(error).toEqual(null);
       });
 
       describe("and a reload is failing", () => {
@@ -68,9 +53,9 @@ describe("Cache", () => {
         it("returns a failed state, together with the current data", () => {
           const [todo, status, error] = todos.byId(42);
 
-          expect(todo, "to equal", { title: "Remember to test" });
-          expect(status, "to equal", FAILED);
-          expect(error, "to equal", err);
+          expect(todo).toEqual({ title: "Remember to test" });
+          expect(status).toEqual(FAILED);
+          expect(error).toEqual(err);
         });
       });
     });
@@ -85,23 +70,23 @@ describe("Cache", () => {
       it("returns a failed state", () => {
         const [todo, status, error] = todos.byId(42);
 
-        expect(todo, "to equal", null);
-        expect(status, "to equal", FAILED);
-        expect(error, "to equal", err);
+        expect(todo).toEqual(null);
+        expect(status).toEqual(FAILED);
+        expect(error).toEqual(err);
       });
     });
 
     it("triggers updates to computeds", async () => {
-      const fakePromise = new FakePromise();
+      const fakePromise = new FakePromise<Todo>();
 
       const wired = computed(() => todos.byId(42));
 
-      const values = [];
+      const values: [Todo | null, string, Error | null][] = [];
       wired.subscribe(() => {
         values.push(wired());
       });
 
-      todos.load(42, () => fakePromise);
+      todos.load(42, () => fakePromise as Promise<Todo>);
 
       flush();
 
@@ -112,16 +97,12 @@ describe("Cache", () => {
       await delay();
       flush();
 
-      expect(values, "to equal", [
+      expect(values).toEqual([
         [null, "LOADING", null],
         [{ title: "Remember to test" }, "LOADED", null],
       ]);
 
-      expect(wired(), "to equal", [
-        { title: "Remember to test" },
-        "LOADED",
-        null,
-      ]);
+      expect(wired()).toEqual([{ title: "Remember to test" }, "LOADED", null]);
     });
   });
 
@@ -130,7 +111,7 @@ describe("Cache", () => {
       it("returns UNINITIALIZED", () => {
         const status = todos.statusById(42);
 
-        expect(status, "to equal", UNINITIALIZED);
+        expect(status).toEqual(UNINITIALIZED);
       });
     });
 
@@ -142,7 +123,7 @@ describe("Cache", () => {
       it("returns LOADED", () => {
         const status = todos.statusById(42);
 
-        expect(status, "to equal", LOADED);
+        expect(status).toEqual(LOADED);
       });
 
       describe("and a reload is failing", () => {
@@ -156,7 +137,7 @@ describe("Cache", () => {
         it("returns FAILED", () => {
           const status = todos.statusById(42);
 
-          expect(status, "to equal", FAILED);
+          expect(status).toEqual(FAILED);
         });
       });
     });
@@ -171,21 +152,21 @@ describe("Cache", () => {
       it("returns a failed state", () => {
         const status = todos.statusById(42);
 
-        expect(status, "to equal", FAILED);
+        expect(status).toEqual(FAILED);
       });
     });
 
     it("triggers updates to computeds", async () => {
-      const fakePromise = new FakePromise();
+      const fakePromise = new FakePromise<Todo>();
 
       const wired = computed(() => todos.statusById(42));
 
-      const values = [];
+      const values: string[] = [];
       wired.subscribe(() => {
         values.push(wired());
       });
 
-      todos.load(42, () => fakePromise);
+      todos.load(42, () => fakePromise as Promise<Todo>);
 
       flush();
 
@@ -196,22 +177,22 @@ describe("Cache", () => {
       await delay();
       flush();
 
-      expect(values, "to equal", ["LOADING", "LOADED"]);
+      expect(values).toEqual(["LOADING", "LOADED"]);
 
-      expect(wired(), "to equal", "LOADED");
+      expect(wired()).toEqual("LOADED");
     });
   });
 
   describe("load", () => {
     it("sets the status to loading while resolving", () => {
-      const fakePromise = new FakePromise();
+      const fakePromise = new FakePromise<Todo>();
 
-      todos.load(42, () => fakePromise);
+      todos.load(42, () => fakePromise as Promise<Todo>);
 
       const [todo, status, error] = todos.byId(42);
-      expect(todo, "to equal", null);
-      expect(status, "to equal", LOADING);
-      expect(error, "to equal", null);
+      expect(todo).toEqual(null);
+      expect(status).toEqual(LOADING);
+      expect(error).toEqual(null);
     });
 
     it("updates the entity with the given id with a value", async () => {
@@ -219,13 +200,13 @@ describe("Cache", () => {
 
       const [todo, status, error] = todos.byId(42);
 
-      expect(todo, "to equal", { title: "Remember to test" });
-      expect(status, "to equal", LOADED);
-      expect(error, "to equal", null);
+      expect(todo).toEqual({ title: "Remember to test" });
+      expect(status).toEqual(LOADED);
+      expect(error).toEqual(null);
     });
 
     it("updates the entity with the given id with a value returned by the resolver", async () => {
-      const todos = new Cache("todo");
+      const todos = new Cache<Todo>("todo");
 
       await todos.load(42, () => ({
         title: "Remember to test",
@@ -233,13 +214,13 @@ describe("Cache", () => {
 
       const [todo, status, error] = todos.byId(42);
 
-      expect(todo, "to equal", { title: "Remember to test" });
-      expect(status, "to equal", LOADED);
-      expect(error, "to equal", null);
+      expect(todo).toEqual({ title: "Remember to test" });
+      expect(status).toEqual(LOADED);
+      expect(error).toEqual(null);
     });
 
     it("allows re-loading a value", async () => {
-      const todos = new Cache("todo");
+      const todos = new Cache<Todo>("todo");
 
       await todos.load(42, () => ({
         title: "Remember to test",
@@ -251,20 +232,20 @@ describe("Cache", () => {
 
       const [todo, status, error] = todos.byId(42);
 
-      expect(todo, "to equal", { title: "This is updated" });
-      expect(status, "to equal", LOADED);
-      expect(error, "to equal", null);
+      expect(todo).toEqual({ title: "This is updated" });
+      expect(status).toEqual(LOADED);
+      expect(error).toEqual(null);
     });
   });
 
   describe("loadMany", () => {
     it("sets the status to loading while resolving", () => {
-      const fakePromise = new FakePromise();
+      const fakePromise = new FakePromise<Todo[]>();
 
-      todos.loadMany([42, 43], () => fakePromise);
+      todos.loadMany([42, 43], () => fakePromise as Promise<Todo[]>);
 
-      expect(todos.byId(42), "to equal", [null, LOADING, null]);
-      expect(todos.byId(43), "to equal", [null, LOADING, null]);
+      expect(todos.byId(42)).toEqual([null, LOADING, null]);
+      expect(todos.byId(43)).toEqual([null, LOADING, null]);
     });
 
     it("updates the entity with the given id with a value", async () => {
@@ -276,13 +257,13 @@ describe("Cache", () => {
         ],
       );
 
-      expect(todos.byId(42), "to equal", [
+      expect(todos.byId(42)).toEqual([
         { title: "Remember to test" },
         LOADED,
         null,
       ]);
 
-      expect(todos.byId(43), "to equal", [
+      expect(todos.byId(43)).toEqual([
         { title: "Even when there is many things to test" },
         LOADED,
         null,
@@ -290,7 +271,7 @@ describe("Cache", () => {
     });
 
     it("updates the entity with the given id with a value returned by the resolver", async () => {
-      const todos = new Cache("todo");
+      const todos = new Cache<Todo>("todo");
 
       await todos.loadMany([42, 43], () =>
         Promise.resolve([
@@ -299,13 +280,13 @@ describe("Cache", () => {
         ]),
       );
 
-      expect(todos.byId(42), "to equal", [
+      expect(todos.byId(42)).toEqual([
         { title: "Remember to test" },
         LOADED,
         null,
       ]);
 
-      expect(todos.byId(43), "to equal", [
+      expect(todos.byId(43)).toEqual([
         { title: "Even when there is many things to test" },
         LOADED,
         null,
@@ -315,14 +296,14 @@ describe("Cache", () => {
 
   describe("initialize", () => {
     it("sets the status to loading while resolving", () => {
-      const fakePromise = new FakePromise();
+      const fakePromise = new FakePromise<Todo>();
 
-      todos.initialize(42, () => fakePromise);
+      todos.initialize(42, () => fakePromise as Promise<Todo>);
 
       const [todo, status, error] = todos.byId(42);
-      expect(todo, "to equal", null);
-      expect(status, "to equal", LOADING);
-      expect(error, "to equal", null);
+      expect(todo).toEqual(null);
+      expect(status).toEqual(LOADING);
+      expect(error).toEqual(null);
     });
 
     it("updates the entity with the given id with a value", async () => {
@@ -330,13 +311,13 @@ describe("Cache", () => {
 
       const [todo, status, error] = todos.byId(42);
 
-      expect(todo, "to equal", { title: "Remember to test" });
-      expect(status, "to equal", LOADED);
-      expect(error, "to equal", null);
+      expect(todo).toEqual({ title: "Remember to test" });
+      expect(status).toEqual(LOADED);
+      expect(error).toEqual(null);
     });
 
     it("updates the entity with the given id with a value returned by the resolver", async () => {
-      const todos = new Cache("todo");
+      const todos = new Cache<Todo>("todo");
 
       await todos.initialize(42, () => ({
         title: "Remember to test",
@@ -344,37 +325,40 @@ describe("Cache", () => {
 
       const [todo, status, error] = todos.byId(42);
 
-      expect(todo, "to equal", { title: "Remember to test" });
-      expect(status, "to equal", LOADED);
-      expect(error, "to equal", null);
+      expect(todo).toEqual({ title: "Remember to test" });
+      expect(status).toEqual(LOADED);
+      expect(error).toEqual(null);
     });
 
     it("reloads failed values", async () => {
-      const fakePromise = new FakePromise();
+      const fakePromise = new FakePromise<Todo>();
 
-      const todos = new Cache("todo");
+      const todos = new Cache<Todo>("todo");
 
-      const initializePromise = todos.initialize(42, () => fakePromise);
+      const initializePromise = todos.initialize(
+        42,
+        () => fakePromise as Promise<Todo>,
+      );
       fakePromise.reject(new Error("Failed"));
       await initializePromise;
 
       let result = todos.byId(42);
 
-      expect(result[0], "to equal", null);
-      expect(result[1], "to equal", FAILED);
-      expect(result[2], "to satisfy", { message: "Failed" });
+      expect(result[0]).toEqual(null);
+      expect(result[1]).toEqual(FAILED);
+      expect(result[2]).toMatchObject({ message: "Failed" });
 
       await todos.initialize(42, { title: "Remember to test" });
 
       result = todos.byId(42);
 
-      expect(result[0], "to equal", { title: "Remember to test" });
-      expect(result[1], "to equal", LOADED);
-      expect(result[2], "to equal", null);
+      expect(result[0]).toEqual({ title: "Remember to test" });
+      expect(result[1]).toEqual(LOADED);
+      expect(result[2]).toEqual(null);
     });
 
     it("ignores re-initializing", async () => {
-      const todos = new Cache("todo");
+      const todos = new Cache<Todo>("todo");
 
       await todos.initialize(42, {
         title: "Remember to test",
@@ -386,9 +370,9 @@ describe("Cache", () => {
 
       const [todo, status, error] = todos.byId(42);
 
-      expect(todo, "to equal", { title: "Remember to test" });
-      expect(status, "to equal", LOADED);
-      expect(error, "to equal", null);
+      expect(todo).toEqual({ title: "Remember to test" });
+      expect(status).toEqual(LOADED);
+      expect(error).toEqual(null);
     });
   });
 
@@ -402,9 +386,9 @@ describe("Cache", () => {
 
       const [todo, status, error] = todos.byId(42);
 
-      expect(todo, "to satisfy", null);
-      expect(status, "to satisfy", UNINITIALIZED);
-      expect(error, "to satisfy", null);
+      expect(todo).toEqual(null);
+      expect(status).toEqual(UNINITIALIZED);
+      expect(error).toEqual(null);
     });
   });
 
@@ -418,9 +402,9 @@ describe("Cache", () => {
 
       const [todo, status, error] = todos.byId(42);
 
-      expect(todo, "to satisfy", null);
-      expect(status, "to satisfy", UNINITIALIZED);
-      expect(error, "to satisfy", null);
+      expect(todo).toEqual(null);
+      expect(status).toEqual(UNINITIALIZED);
+      expect(error).toEqual(null);
     });
   });
 });
